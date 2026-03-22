@@ -1,0 +1,676 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+        />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta
+            name="apple-mobile-web-app-status-bar-style"
+            content="black-translucent"
+        />
+        <meta name="apple-mobile-web-app-title" content="Bubbles" />
+        <meta name="mobile-web-app-capable" content="yes" />
+        <meta name="theme-color" content="#f0ebe3" />
+        <link
+            rel="icon"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>"
+        />
+        <link
+            rel="apple-touch-icon"
+            href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎯</text></svg>"
+        />
+        <title>Focus Areas</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Serif:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet"
+        />
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+            body {
+                font-family:
+                    -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+                background: #f6f1eb;
+                color: #5a4a3b;
+                min-height: 100vh;
+            }
+
+            .wrap {
+                max-width: 720px;
+                margin: 0 auto;
+                padding: 32px 20px;
+            }
+
+            h1 {
+                font-family: "IBM Plex Serif", serif;
+                font-size: 28px;
+                font-weight: 300;
+                color: #2c2520;
+                margin-bottom: 20px;
+            }
+
+            .section-label {
+                font-family: "IBM Plex Sans", sans-serif;
+                font-size: 11px;
+                font-weight: 500;
+                letter-spacing: 0.08em;
+                text-transform: uppercase;
+                color: #b8afa6;
+                margin-bottom: 8px;
+            }
+
+            /* Add row */
+            .add-row {
+                display: flex;
+                gap: 10px;
+                margin-bottom: 24px;
+            }
+            .add-row input[type="text"] {
+                flex: 1;
+                border: none;
+                border-radius: 12px;
+                padding: 12px 16px;
+                font-size: 14px;
+                background: #fff;
+                color: #5a4a3b;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+            }
+            .add-row input[type="text"]::placeholder {
+                color: #baa99a;
+            }
+            .add-row input[type="text"]:focus {
+                outline: 2px solid #c97;
+            }
+            .add-btn {
+                background: #c97044;
+                color: #fff;
+                border: none;
+                border-radius: 12px;
+                padding: 12px 22px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                white-space: nowrap;
+            }
+            .add-btn:hover {
+                background: #b5623a;
+            }
+
+            /* Pills */
+            .bubble-list {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
+                margin-bottom: 24px;
+                min-height: 20px;
+                position: relative;
+            }
+
+            .pill {
+                background: #fff;
+                border-radius: 20px;
+                padding: 8px 14px;
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+                cursor: pointer;
+                transition: box-shadow 0.15s;
+                font-size: 14px;
+                font-weight: 500;
+                color: #4a3b2c;
+                user-select: none;
+            }
+            .pill:hover {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+            }
+            .pill.selected {
+                box-shadow: 0 0 0 2px #c97;
+            }
+
+            .pill .dot {
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                flex-shrink: 0;
+            }
+            .pill .pill-label {
+                white-space: nowrap;
+            }
+            .pill .pill-close {
+                background: none;
+                border: none;
+                color: #c4a090;
+                cursor: pointer;
+                font-size: 15px;
+                line-height: 1;
+                padding: 0 0 0 2px;
+                display: flex;
+                align-items: center;
+            }
+            .pill .pill-close:hover {
+                color: #a05a3a;
+            }
+
+            /* Edit panel - fixed bottom */
+            .edit-panel {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                background: #fff;
+                padding: 14px 20px;
+                box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
+                display: none;
+                gap: 14px;
+                align-items: center;
+                z-index: 100;
+            }
+            .edit-panel.visible {
+                display: flex;
+            }
+
+            .edit-panel .edit-swatch {
+                width: 28px;
+                height: 28px;
+                border-radius: 50%;
+                cursor: pointer;
+                position: relative;
+                flex-shrink: 0;
+                border: 2px solid #e8ddd2;
+            }
+            .edit-panel .edit-swatch input[type="color"] {
+                position: absolute;
+                inset: 0;
+                opacity: 0;
+                cursor: pointer;
+                width: 100%;
+                height: 100%;
+            }
+            .edit-panel .edit-label {
+                border: none;
+                background: none;
+                font-size: 15px;
+                color: #4a3b2c;
+                font-weight: 600;
+                width: 120px;
+                border-bottom: 1.5px solid #e8ddd2;
+                padding: 2px 0;
+                flex-shrink: 0;
+            }
+            .edit-panel .edit-label:focus {
+                outline: none;
+                border-bottom-color: #c97;
+            }
+
+            .edit-panel .slider-group {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                flex: 1;
+            }
+            .edit-panel .slider-group label {
+                font-family: "IBM Plex Sans", sans-serif;
+                font-size: 11px;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+                color: #8a7a6a;
+                font-weight: 600;
+                flex-shrink: 0;
+            }
+            .edit-panel input[type="range"] {
+                flex: 1;
+                accent-color: #c97;
+                background: #f0ebe3;
+                border-radius: 4px;
+                height: 6px;
+                -webkit-appearance: none;
+                appearance: none;
+            }
+            .edit-panel input[type="range"]::-webkit-slider-thumb {
+                -webkit-appearance: none;
+                appearance: none;
+                width: 16px;
+                height: 16px;
+                border-radius: 50%;
+                background: #c97;
+                cursor: pointer;
+                border: none;
+            }
+            .edit-panel .val {
+                font-size: 13px;
+                color: #8a7a6a;
+                min-width: 24px;
+                text-align: right;
+                font-variant-numeric: tabular-nums;
+            }
+
+            .edit-dismiss {
+                background: none;
+                border: none;
+                color: #c4a090;
+                cursor: pointer;
+                font-size: 20px;
+                line-height: 1;
+                padding: 0 2px;
+                flex-shrink: 0;
+            }
+            .edit-dismiss:hover {
+                color: #a05a3a;
+            }
+
+            .empty-msg {
+                color: #baa99a;
+                font-style: italic;
+                font-size: 14px;
+                padding: 4px 0;
+            }
+
+            /* Chart */
+            .chart-card {
+                background: none;
+                padding: 0;
+            }
+            .chart-container {
+                position: relative;
+                width: 100%;
+                aspect-ratio: 4 / 3;
+                border-radius: 12px;
+            }
+
+            .bubble {
+                position: absolute;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-family: "IBM Plex Serif", serif;
+                color: #fff;
+                font-weight: 400;
+                text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+                cursor: grab;
+                user-select: none;
+                text-align: center;
+                padding: 6px;
+                overflow: hidden;
+                word-break: break-word;
+                transition:
+                    box-shadow 0.15s,
+                    transform 0.1s;
+            }
+            .bubble:hover {
+                transform: scale(1.04);
+            }
+            .bubble.selected {
+                box-shadow:
+                    0 0 0 3px #fff,
+                    0 0 0 5px #c97;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="wrap">
+            <h1>Focus Areas</h1>
+
+            <div class="section-label">Add Bubble</div>
+            <div class="add-row">
+                <input
+                    type="text"
+                    id="newLabel"
+                    placeholder="label (optional)"
+                />
+                <button class="add-btn" id="addBtn">Add</button>
+            </div>
+
+            <div class="section-label" id="listLabel">Bubbles</div>
+            <div class="bubble-list" id="bubbleList"></div>
+
+            <div class="chart-card">
+                <div class="chart-container" id="chartContainer"></div>
+            </div>
+        </div>
+
+        <div class="edit-panel" id="editPanel"></div>
+
+        <script>
+            const COLORS = [
+                "#c97044",
+                "#5a8a5a",
+                "#4a8ab5",
+                "#c9a044",
+                "#8a5a8a",
+                "#44a5a0",
+                "#b56a4a",
+                "#6a7ab5",
+                "#b5446a",
+                "#44a56a",
+            ];
+            const STORAGE_KEY = "bubble-chart-data";
+            const defaults = [
+                {
+                    id: 1,
+                    label: "Alpha",
+                    value: 60,
+                    color: COLORS[0],
+                    x: 0.3,
+                    y: 0.4,
+                },
+                {
+                    id: 2,
+                    label: "Beta",
+                    value: 40,
+                    color: COLORS[1],
+                    x: 0.65,
+                    y: 0.3,
+                },
+                {
+                    id: 3,
+                    label: "Gamma",
+                    value: 80,
+                    color: COLORS[2],
+                    x: 0.45,
+                    y: 0.65,
+                },
+            ];
+            let saved = null;
+            try {
+                saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
+            } catch (e) {}
+            let bubbles = saved ? saved.bubbles : defaults;
+            let nextId = saved ? saved.nextId : 4;
+            let selectedId = null;
+
+            const listEl = document.getElementById("bubbleList");
+            const container = document.getElementById("chartContainer");
+            const addBtn = document.getElementById("addBtn");
+            const newLabelInput = document.getElementById("newLabel");
+            const listLabel = document.getElementById("listLabel");
+            const editPanel = document.getElementById("editPanel");
+
+            function save() {
+                localStorage.setItem(
+                    STORAGE_KEY,
+                    JSON.stringify({ bubbles, nextId }),
+                );
+            }
+
+            function render() {
+                save();
+                renderPills();
+                renderEditPanel();
+                renderChart();
+            }
+
+            function renderPills() {
+                listEl.innerHTML = "";
+                listLabel.textContent = bubbles.length
+                    ? `Bubbles (${bubbles.length})`
+                    : "Bubbles";
+
+                if (!bubbles.length) {
+                    listEl.innerHTML =
+                        '<div class="empty-msg">No bubbles yet</div>';
+                    return;
+                }
+
+                bubbles.forEach((b) => {
+                    const pill = document.createElement("div");
+                    pill.className =
+                        "pill" + (b.id === selectedId ? " selected" : "");
+                    pill.innerHTML = `
+      <span class="dot" style="background:${b.color}"></span>
+      <span class="pill-label">${b.label}</span>
+      <button class="pill-close" data-id="${b.id}">&times;</button>
+    `;
+                    pill.addEventListener("click", (e) => {
+                        if (e.target.classList.contains("pill-close")) {
+                            e.stopPropagation();
+                            bubbles = bubbles.filter((x) => x.id !== b.id);
+                            if (selectedId === b.id) selectedId = null;
+                            render();
+                            return;
+                        }
+                        selectedId = selectedId === b.id ? null : b.id;
+                        render();
+                    });
+                    listEl.appendChild(pill);
+                });
+            }
+
+            function renderEditPanel() {
+                const b = bubbles.find((x) => x.id === selectedId);
+                if (!b) {
+                    editPanel.classList.remove("visible");
+                    editPanel.innerHTML = "";
+                    return;
+                }
+
+                editPanel.classList.add("visible");
+                editPanel.innerHTML = `
+    <div class="edit-swatch" style="background:${b.color}">
+      <input type="color" value="${b.color}" id="editColor">
+    </div>
+    <input class="edit-label" type="text" value="${b.label}" id="editLabel" placeholder="Label">
+    <div class="slider-group">
+      <label>Size</label>
+      <input type="range" min="10" max="100" value="${b.value}" id="editValue">
+      <span class="val" id="editVal">${b.value}</span>
+    </div>
+    <button class="edit-dismiss" id="editDismiss">&times;</button>
+  `;
+
+                document
+                    .getElementById("editColor")
+                    .addEventListener("input", (e) => {
+                        b.color = e.target.value;
+                        e.target.parentElement.style.background = b.color;
+                        render();
+                    });
+                document
+                    .getElementById("editLabel")
+                    .addEventListener("input", (e) => {
+                        b.label = e.target.value;
+                        save();
+                        renderPills();
+                        renderChart();
+                    });
+                document
+                    .getElementById("editDismiss")
+                    .addEventListener("click", () => {
+                        selectedId = null;
+                        render();
+                    });
+                document
+                    .getElementById("editValue")
+                    .addEventListener("input", (e) => {
+                        b.value = Number(e.target.value);
+                        document.getElementById("editVal").textContent =
+                            b.value;
+                        save();
+                        renderPills();
+                        renderChart();
+                    });
+            }
+
+            function renderChart() {
+                container.innerHTML = "";
+                if (!bubbles.length) return;
+
+                const rect = container.getBoundingClientRect();
+                const shorter = Math.min(rect.width, rect.height);
+                const maxRadius = shorter * 0.2;
+                const minRadius = shorter * 0.04;
+
+                bubbles.forEach((b) => {
+                    const r =
+                        minRadius + (b.value / 100) * (maxRadius - minRadius);
+                    const size = r * 2;
+                    const el = document.createElement("div");
+                    el.className =
+                        "bubble" + (b.id === selectedId ? " selected" : "");
+                    el.style.width = size + "px";
+                    el.style.height = size + "px";
+                    el.style.background = b.color;
+                    el.style.left = b.x * rect.width - r + "px";
+                    el.style.top = b.y * rect.height - r + "px";
+                    el.style.fontSize = Math.max(10, r * 0.32) + "px";
+
+                    const span = document.createElement("span");
+                    span.textContent = b.label;
+                    span.style.pointerEvents = "none";
+                    el.appendChild(span);
+
+                    el.addEventListener("dblclick", (e) => {
+                        e.stopPropagation();
+                        span.contentEditable = "true";
+                        span.style.pointerEvents = "auto";
+                        span.style.cursor = "text";
+                        span.style.outline = "none";
+                        span.focus();
+                        const range = document.createRange();
+                        range.selectNodeContents(span);
+                        const sel = window.getSelection();
+                        sel.removeAllRanges();
+                        sel.addRange(range);
+
+                        function commit() {
+                            span.contentEditable = "false";
+                            span.style.pointerEvents = "none";
+                            span.style.cursor = "";
+                            b.label = span.textContent.trim() || b.label;
+                            save();
+                            renderPills();
+                            renderEditPanel();
+                        }
+                        span.addEventListener("blur", commit, { once: true });
+                        span.addEventListener("keydown", (ke) => {
+                            if (ke.key === "Enter") {
+                                ke.preventDefault();
+                                span.blur();
+                            }
+                        });
+                    });
+
+                    let didDrag = false;
+                    el.addEventListener("mousedown", (e) => {
+                        if (span.contentEditable === "true") return;
+                        didDrag = false;
+                        const sx = e.clientX,
+                            sy = e.clientY;
+                        function detectMove(ev) {
+                            if (
+                                Math.abs(ev.clientX - sx) +
+                                    Math.abs(ev.clientY - sy) >
+                                3
+                            )
+                                didDrag = true;
+                        }
+                        document.addEventListener("mousemove", detectMove);
+                        document.addEventListener(
+                            "mouseup",
+                            () => {
+                                document.removeEventListener(
+                                    "mousemove",
+                                    detectMove,
+                                );
+                            },
+                            { once: true },
+                        );
+                        startDrag(e, b);
+                    });
+                    el.addEventListener(
+                        "touchstart",
+                        (e) => {
+                            if (span.contentEditable === "true") return;
+                            e.preventDefault();
+                            startDrag(e.touches[0], b);
+                        },
+                        { passive: false },
+                    );
+                    el.addEventListener("click", (e) => {
+                        if (span.contentEditable === "true") return;
+                        if (didDrag) return;
+                        if (selectedId === b.id) return; // don't re-render if already selected
+                        selectedId = b.id;
+                        render();
+                    });
+
+                    container.appendChild(el);
+                });
+            }
+
+            function startDrag(e, bubble) {
+                e.preventDefault();
+                const wasSelected = selectedId === bubble.id;
+                selectedId = bubble.id;
+                const rect = container.getBoundingClientRect();
+                const startX = (e.clientX || e.pageX) - rect.left;
+                const startY = (e.clientY || e.pageY) - rect.top;
+                const origX = bubble.x;
+                const origY = bubble.y;
+                let moved = false;
+
+                function onMove(ev) {
+                    const pt = ev.touches ? ev.touches[0] : ev;
+                    const dx = (pt.clientX - rect.left - startX) / rect.width;
+                    const dy = (pt.clientY - rect.top - startY) / rect.height;
+                    if (Math.abs(dx) + Math.abs(dy) > 0.005) moved = true;
+                    if (!moved) return;
+                    bubble.x = Math.max(0.05, Math.min(0.95, origX + dx));
+                    bubble.y = Math.max(0.05, Math.min(0.95, origY + dy));
+                    renderChart();
+                }
+
+                function onUp() {
+                    document.removeEventListener("mousemove", onMove);
+                    document.removeEventListener("mouseup", onUp);
+                    document.removeEventListener("touchmove", onMove);
+                    document.removeEventListener("touchend", onUp);
+                    if (moved || !wasSelected) {
+                        save();
+                        render();
+                    }
+                }
+
+                document.addEventListener("mousemove", onMove);
+                document.addEventListener("mouseup", onUp);
+                document.addEventListener("touchmove", onMove, {
+                    passive: false,
+                });
+                document.addEventListener("touchend", onUp);
+            }
+
+            function addBubble() {
+                const label =
+                    newLabelInput.value.trim() ||
+                    "Bubble " + (bubbles.length + 1);
+                const b = {
+                    id: nextId++,
+                    label,
+                    value: 50,
+                    color: COLORS[bubbles.length % COLORS.length],
+                    x: 0.25 + Math.random() * 0.5,
+                    y: 0.25 + Math.random() * 0.5,
+                };
+                bubbles.push(b);
+                selectedId = b.id;
+                newLabelInput.value = "";
+                render();
+            }
+
+            addBtn.addEventListener("click", addBubble);
+            newLabelInput.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") addBubble();
+            });
+
+            window.addEventListener("resize", () => renderChart());
+            render();
+        </script>
+    </body>
+</html>
