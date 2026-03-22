@@ -470,7 +470,9 @@
                     .addEventListener("input", (e) => {
                         b.color = e.target.value;
                         e.target.parentElement.style.background = b.color;
-                        render();
+                        save();
+                        renderPills();
+                        renderChart();
                     });
                 document
                     .getElementById("editLabel")
@@ -504,7 +506,7 @@
 
                 const rect = container.getBoundingClientRect();
                 const shorter = Math.min(rect.width, rect.height);
-                const maxRadius = shorter * 0.2;
+                const maxRadius = shorter * 0.4;
                 const minRadius = shorter * 0.04;
 
                 bubbles.forEach((b) => {
@@ -519,7 +521,7 @@
                     el.style.background = b.color;
                     el.style.left = b.x * rect.width - r + "px";
                     el.style.top = b.y * rect.height - r + "px";
-                    el.style.fontSize = Math.max(10, r * 0.32) + "px";
+                    el.style.fontSize = Math.max(10, r * 0.28) + "px";
 
                     const span = document.createElement("span");
                     span.textContent = b.label;
